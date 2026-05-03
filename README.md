@@ -93,6 +93,21 @@ Optional PostgreSQL run:
 .\start.ps1 -WithPostgres
 ```
 
+Write OWID data to PostgreSQL and build dbt models:
+
+```powershell
+.\start.ps1 -WithPostgres -WriteDb
+```
+
+When `-WriteDb` is used, the API reads from the dbt mart table:
+`analytics.mart_country_health_trends`.
+
+Run dbt manually:
+
+```powershell
+.\scripts\run_dbt.ps1
+```
+
 Use the bundled sample dataset:
 
 ```powershell

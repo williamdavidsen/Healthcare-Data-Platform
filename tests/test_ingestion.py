@@ -65,7 +65,7 @@ def test_merge_indicator_frames_creates_valid_health_indicators():
         base.assign(gdp_per_capita=[52000.0, 68000.0]),
     ]
 
-    result = merge_indicator_frames(frames, start_year=2000)
+    result = merge_indicator_frames(frames, start_year=2000, end_year=2020)
 
     assert len(result) == 1
     assert result.loc[0, "country"] == "Norway"
@@ -116,8 +116,9 @@ def test_merge_indicator_frames_carries_latest_known_values_forward():
         ),
     ]
 
-    result = merge_indicator_frames(frames, start_year=2020)
+    result = merge_indicator_frames(frames, start_year=2020, end_year=2026)
 
-    latest = result[result["year"] == 2024].iloc[0]
+    latest = result[result["year"] == 2026].iloc[0]
+    assert latest["life_expectancy"] == 83.6
     assert latest["diabetes_prevalence"] == 5.4
     assert latest["obesity_rate"] == 23.7

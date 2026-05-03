@@ -5,7 +5,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.analytics import add_health_risk_score, country_summary
-from src.config import PROCESSED_DATASET, SAMPLE_DATASET
+from src.config import MART_SCHEMA, MART_TABLE, PROCESSED_DATASET, SAMPLE_DATASET, USE_DATABASE
 from src.validation import validate_health_indicators
 
 
@@ -20,6 +20,13 @@ app.add_middleware(
 
 
 def load_dataset() -> pd.DataFrame:
+    if USE_DATABASE:
+        from src.database import read_health_indicators_mart
+
+        df = read_health_indicators_mart(schema=MART_SCHEMA, table_name=MART_TABLE)
+        validate_health_indicators(df)
+        return df
+
     path = PROCESSED_DATASET if PROCESSED_DATASET.exists() else SAMPLE_DATASET
     df = pd.read_csv(path)
     validate_health_indicators(df)

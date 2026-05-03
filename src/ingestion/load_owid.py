@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date
 from dataclasses import dataclass
 from io import StringIO
 from pathlib import Path
@@ -83,9 +84,16 @@ def load_indicator_frame(indicator: OwidIndicator, csv_text: str | None = None) 
     return result.dropna(subset=["country", "iso_code", "year", indicator.output_column])
 
 
-def merge_indicator_frames(frames: list[pd.DataFrame], start_year: int = 2000) -> pd.DataFrame:
+def merge_indicator_frames(
+    frames: list[pd.DataFrame],
+    start_year: int = 2000,
+    end_year: int | None = None,
+) -> pd.DataFrame:
     if not frames:
         raise ValueError("No indicator frames were provided")
+
+    if end_year is None:
+        end_year = date.today().year
 
     merged = frames[0]
     for frame in frames[1:]:
@@ -93,6 +101,12 @@ def merge_indicator_frames(frames: list[pd.DataFrame], start_year: int = 2000) -
 
     merged["year"] = merged["year"].astype(int)
     merged = merged.sort_values(["country", "iso_code", "year"])
+    countries = merged[["country", "iso_code"]].drop_duplicates()
+    country_years = countries.merge(
+        pd.DataFrame({"year": range(start_year, end_year + 1)}),
+        how="cross",
+    )
+    merged = country_years.merge(merged, on=["country", "iso_code", "year"], how="left")
     value_columns = [
         column
         for column in merged.columns
@@ -101,18 +115,18 @@ def merge_indicator_frames(frames: list[pd.DataFrame], start_year: int = 2000) -
     merged[value_columns] = merged.groupby(["country", "iso_code"], sort=False)[
         value_columns
     ].ffill()
-    merged = merged[merged["year"] >= start_year].dropna(subset=value_columns)
+    merged = merged.dropna(subset=value_columns)
     merged = merged.sort_values(["country", "year"]).reset_index(drop=True)
     validate_health_indicators(merged)
     return merged
 
 
-def build_owid_health_indicators(start_year: int = 2000) -> pd.DataFrame:
+def build_owid_health_indicators(start_year: int = 2000, end_year: int | None = None) -> pd.DataFrame:
     frames = []
     for indicator in OWID_INDICATORS:
         download_indicator(indicator)
         frames.append(load_indicator_frame(indicator))
-    return merge_indicator_frames(frames, start_year=start_year)
+    return merge_indicator_frames(frames, start_year=start_year, end_year=end_year)
 
 
 def save_processed_dataset(df: pd.DataFrame, path: Path = PROCESSED_DATASET) -> None:
@@ -123,10 +137,11 @@ def save_processed_dataset(df: pd.DataFrame, path: Path = PROCESSED_DATASET) -> 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Load OWID healthcare indicators")
     parser.add_argument("--start-year", type=int, default=2000)
+    parser.add_argument("--end-year", type=int, default=date.today().year)
     parser.add_argument("--write-db", action="store_true")
     args = parser.parse_args()
 
-    df = build_owid_health_indicators(start_year=args.start_year)
+    df = build_owid_health_indicators(start_year=args.start_year, end_year=args.end_year)
     save_processed_dataset(df)
 
     if args.write_db:

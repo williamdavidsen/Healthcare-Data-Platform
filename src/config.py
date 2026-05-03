@@ -12,3 +12,6 @@ DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql://healthcare:healthcare@localhost:5432/healthcare",
 )
+USE_DATABASE = os.getenv("USE_DATABASE", "false").lower() in {"1", "true", "yes"}
+MART_SCHEMA = os.getenv("MART_SCHEMA", "analytics")
+MART_TABLE = os.getenv("MART_TABLE", "mart_country_health_trends")

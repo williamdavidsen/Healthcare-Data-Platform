@@ -3,6 +3,7 @@ param(
     [switch]$UseSample,
     [switch]$UseOwid,
     [switch]$WriteDb,
+    [switch]$RunDbt,
     [switch]$UseStreamlit,
     [switch]$SkipInstall,
     [switch]$NoBrowser
@@ -53,6 +54,14 @@ else {
         Write-Host "OWID load failed; falling back to sample data."
         & $venvPython -m src.ingestion.load_sample
     }
+}
+
+if ($RunDbt -or $WriteDb) {
+    Write-Host "Running dbt models and tests..."
+    & (Join-Path $projectRoot "scripts/run_dbt.ps1")
+    $env:USE_DATABASE = "true"
+    $env:MART_SCHEMA = "analytics"
+    $env:MART_TABLE = "mart_country_health_trends"
 }
 
 $logDir = Join-Path $projectRoot ".logs"

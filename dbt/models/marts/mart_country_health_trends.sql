@@ -7,10 +7,11 @@ select
     obesity_rate,
     health_spending_per_capita,
     gdp_per_capita,
-    round(
+    round((
         diabetes_prevalence * 0.45
         + obesity_rate * 0.35
-        - life_expectancy * 0.05,
+        - life_expectancy * 0.05
+    )::numeric,
         2
-    ) as health_risk_score
+    )::double precision as health_risk_score
 from {{ ref('stg_health_indicators') }}
