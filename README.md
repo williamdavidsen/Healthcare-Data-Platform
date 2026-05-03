@@ -1,0 +1,125 @@
+# Healthcare Data Platform
+
+An end-to-end healthcare data engineering project that ingests public health datasets, stores raw data, models analytics tables, and serves insights through a dashboard and API.
+
+## Why This Project
+
+Healthcare data is often fragmented across organizations, formats, and country-level reporting standards. This project shows how to build a reliable analytics platform around public health indicators such as life expectancy, diabetes prevalence, obesity, population, and health spending.
+
+The goal is not medical diagnosis. The goal is clean data engineering: ingestion, validation, modeling, analytics, and reproducible delivery.
+
+## Architecture
+
+```text
+Public datasets
+  OWID CSV / WHO API / CDC API
+        |
+        v
+Python ingestion
+        |
+        v
+Raw files + PostgreSQL raw schema
+        |
+        v
+dbt transformations
+        |
+        v
+Analytics marts
+        |
+        +--> Streamlit dashboard
+        +--> FastAPI analytics API
+```
+
+## Tech Stack
+
+- Python: ingestion, validation, analytics helpers
+- PostgreSQL: raw and modeled data storage
+- dbt: transformations and data modeling
+- Streamlit: interactive dashboard
+- FastAPI: lightweight analytics API
+- Docker Compose: local infrastructure
+- pytest: automated tests
+- GitHub Actions: CI checks
+
+## Project Roadmap
+
+### Phase 1: Portfolio MVP
+
+- Load a small sample health indicator dataset
+- Validate required columns and data types
+- Build Streamlit charts for country and year comparisons
+- Add tests for ingestion and validation
+
+### Phase 2: Real Pipeline
+
+- Add OWID CSV ingestion
+- Store raw data in PostgreSQL
+- Add dbt staging and marts
+- Add data quality checks
+
+### Phase 3: Production Polish
+
+- Add Prefect orchestration
+- Add FastAPI endpoints
+- Add Docker Compose one-command startup
+- Add screenshots and architecture diagram
+
+### Phase 4: Advanced Extensions
+
+- Add WHO or CDC datasets
+- Add correlation analysis
+- Add simple risk index feature engineering
+- Add scheduled CI pipeline validation
+
+## How To Run
+
+Create and activate a virtual environment, then install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Run the sample ingestion:
+
+```bash
+python -m src.ingestion.load_sample
+```
+
+Run tests:
+
+```bash
+pytest
+```
+
+Run the dashboard:
+
+```bash
+streamlit run dashboard/app.py
+```
+
+Run the API:
+
+```bash
+uvicorn api.main:app --reload
+```
+
+## Data Sources
+
+- Our World in Data
+- World Health Organization Global Health Observatory
+- Centers for Disease Control and Prevention
+
+## Portfolio Notes
+
+This repository is designed to show practical data engineering skills:
+
+- Clear pipeline architecture
+- Reproducible local setup
+- Realistic public data sources
+- Tested ingestion and validation code
+- Dashboard and API as user-facing outputs
+- dbt-ready modeling structure
+
+## Medical Disclaimer
+
+This project is for educational and analytics portfolio purposes only. It does not provide medical advice, diagnosis, or treatment recommendations.

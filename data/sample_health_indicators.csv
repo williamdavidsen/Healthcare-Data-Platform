@@ -1,0 +1,13 @@
+country,iso_code,year,life_expectancy,diabetes_prevalence,obesity_rate,health_spending_per_capita,gdp_per_capita
+Norway,NOR,2018,82.8,5.3,23.1,7464,75497
+Norway,NOR,2019,82.9,5.3,23.2,7582,76430
+Norway,NOR,2020,83.2,5.4,23.4,7833,68340
+Norway,NOR,2021,83.2,5.4,23.5,8120,89154
+Turkey,TUR,2018,77.4,11.1,31.5,1190,28240
+Turkey,TUR,2019,77.7,11.1,31.8,1225,28280
+Turkey,TUR,2020,76.1,11.2,32.0,1288,28130
+Turkey,TUR,2021,76.0,11.3,32.2,1340,30220
+United States,USA,2018,78.7,10.5,36.2,10624,62630
+United States,USA,2019,78.8,10.6,36.5,10949,65120
+United States,USA,2020,77.0,10.7,36.8,11702,63530
+United States,USA,2021,76.4,10.8,37.0,12318,70250

@@ -1,0 +1,15 @@
+name: healthcare_data_platform
+version: "1.0.0"
+config-version: 2
+
+profile: healthcare_data_platform
+
+model-paths: ["models"]
+test-paths: ["tests"]
+
+models:
+  healthcare_data_platform:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
