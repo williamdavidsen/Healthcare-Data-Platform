@@ -1,0 +1,340 @@
+import React from "react";
+import ReactDOM from "react-dom/client";
+import {
+  Activity,
+  ChevronDown,
+  CircleDollarSign,
+  Database,
+  HeartPulse,
+  LineChart,
+  ShieldCheck,
+  Stethoscope,
+} from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart as RechartsLineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import "./styles.css";
+
+type SummaryRow = {
+  country: string;
+  iso_code: string;
+  year: number;
+  life_expectancy: number;
+  diabetes_prevalence: number;
+  obesity_rate: number;
+  health_spending_per_capita: number;
+  gdp_per_capita: number;
+  health_risk_score: number;
+};
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8002";
+
+const metrics = [
+  { key: "life_expectancy", label: "Life expectancy", unit: "years", color: "#005eb8" },
+  { key: "diabetes_prevalence", label: "Diabetes", unit: "%", color: "#b0005a" },
+  { key: "obesity_rate", label: "Obesity", unit: "%", color: "#007c89" },
+  { key: "health_spending_per_capita", label: "Spending", unit: "USD", color: "#6b4eff" },
+  { key: "health_risk_score", label: "Risk score", unit: "score", color: "#d2421f" },
+] as const;
+
+type MetricKey = (typeof metrics)[number]["key"];
+
+function formatNumber(value: number, unit?: string) {
+  const formatted = new Intl.NumberFormat("en", {
+    maximumFractionDigits: value > 100 ? 0 : 1,
+  }).format(value);
+  return unit ? `${formatted} ${unit}` : formatted;
+}
+
+function App() {
+  const [summary, setSummary] = React.useState<SummaryRow[]>([]);
+  const [countries, setCountries] = React.useState<string[]>([]);
+  const [country, setCountry] = React.useState("");
+  const [trend, setTrend] = React.useState<SummaryRow[]>([]);
+  const [metric, setMetric] = React.useState<MetricKey>("life_expectancy");
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState("");
+
+  React.useEffect(() => {
+    async function loadInitialData() {
+      try {
+        const [summaryResponse, countriesResponse] = await Promise.all([
+          fetch(`${API_BASE}/summary`),
+          fetch(`${API_BASE}/countries`),
+        ]);
+
+        if (!summaryResponse.ok || !countriesResponse.ok) {
+          throw new Error("Could not load health indicators");
+        }
+
+        const summaryData = (await summaryResponse.json()) as SummaryRow[];
+        const countryData = (await countriesResponse.json()) as string[];
+        setSummary(summaryData);
+        setCountries(countryData);
+        setCountry(countryData[0] ?? "");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadInitialData();
+  }, []);
+
+  React.useEffect(() => {
+    if (!country) {
+      return;
+    }
+
+    async function loadTrend() {
+      try {
+        const response = await fetch(`${API_BASE}/trend?country=${encodeURIComponent(country)}`);
+        if (!response.ok) {
+          throw new Error("Could not load country trend");
+        }
+        setTrend((await response.json()) as SummaryRow[]);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      }
+    }
+
+    loadTrend();
+  }, [country]);
+
+  const selectedMetric = metrics.find((item) => item.key === metric) ?? metrics[0];
+  const selectedCountry = summary.find((row) => row.country === country);
+  const latestYear = summary[0]?.year ?? new Date().getFullYear();
+  const avgLifeExpectancy =
+    summary.reduce((total, row) => total + row.life_expectancy, 0) / Math.max(summary.length, 1);
+  const lowestRisk = [...summary].sort((a, b) => a.health_risk_score - b.health_risk_score)[0];
+
+  if (loading) {
+    return (
+      <main className="shell center-state">
+        <div className="loader" aria-label="Loading" />
+      </main>
+    );
+  }
+
+  return (
+    <main className="shell">
+      <header className="topbar" aria-label="Application header">
+        <a className="brand" href="/">
+          <span className="brand-mark" aria-hidden="true">
+            <HeartPulse size={27} strokeWidth={2.2} />
+          </span>
+          <span>
+            <strong>Healthcare Data</strong>
+            <small>Public health indicators</small>
+          </span>
+        </a>
+        <nav className="nav-links" aria-label="Primary navigation">
+          <a href="#overview">Overview</a>
+          <a href="#trend">Trend</a>
+          <a href="#countries">Countries</a>
+        </nav>
+      </header>
+
+      <section className="hero" id="overview">
+        <div className="hero-copy">
+          <span className="eyebrow">
+            <ShieldCheck size={18} /> Validated analytics dataset
+          </span>
+          <h1>Understand country health trends at a glance.</h1>
+          <p>
+            A clean dashboard for comparing life expectancy, diabetes, obesity,
+            spending and GDP across public health datasets.
+          </p>
+          <div className="hero-actions">
+            <a className="primary-action" href="#trend">
+              Explore trends
+              <LineChart size={19} />
+            </a>
+            <a className="secondary-action" href={`${API_BASE}/docs`}>
+              API docs
+              <Database size={18} />
+            </a>
+          </div>
+        </div>
+        <div className="hero-panel" aria-label="Key project status">
+          <div>
+            <span>Dataset year</span>
+            <strong>{latestYear}</strong>
+          </div>
+          <div>
+            <span>Countries</span>
+            <strong>{countries.length}</strong>
+          </div>
+          <div>
+            <span>Best risk profile</span>
+            <strong>{lowestRisk?.country ?? "N/A"}</strong>
+          </div>
+        </div>
+      </section>
+
+      {error ? <p className="error-state">{error}</p> : null}
+
+      <section className="stat-grid" aria-label="Headline metrics">
+        <MetricCard
+          icon={<Stethoscope />}
+          label="Average life expectancy"
+          value={formatNumber(avgLifeExpectancy, "years")}
+        />
+        <MetricCard
+          icon={<Activity />}
+          label="Selected country"
+          value={selectedCountry?.country ?? country}
+          detail={selectedCountry ? `${selectedCountry.iso_code} / ${selectedCountry.year}` : ""}
+        />
+        <MetricCard
+          icon={<CircleDollarSign />}
+          label="Health spending"
+          value={
+            selectedCountry
+              ? formatNumber(selectedCountry.health_spending_per_capita, "USD")
+              : "N/A"
+          }
+        />
+      </section>
+
+      <section className="workspace" id="trend">
+        <aside className="control-panel" aria-label="Dashboard filters">
+          <label>
+            <span>Country</span>
+            <select value={country} onChange={(event) => setCountry(event.target.value)}>
+              {countries.map((item) => (
+                <option key={item}>{item}</option>
+              ))}
+            </select>
+            <ChevronDown className="select-icon" size={20} aria-hidden="true" />
+          </label>
+
+          <div className="metric-picker" role="group" aria-label="Metric selector">
+            {metrics.map((item) => (
+              <button
+                key={item.key}
+                className={metric === item.key ? "active" : ""}
+                onClick={() => setMetric(item.key)}
+                type="button"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        <section className="chart-panel">
+          <div className="section-heading">
+            <div>
+              <span>{country}</span>
+              <h2>{selectedMetric.label} trend</h2>
+            </div>
+            <p>{selectedMetric.unit}</p>
+          </div>
+          <div className="chart-frame">
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsLineChart data={trend} margin={{ left: 0, right: 20, top: 20, bottom: 8 }}>
+                <CartesianGrid stroke="#d6e4f2" strokeDasharray="4 4" />
+                <XAxis dataKey="year" tickLine={false} axisLine={false} />
+                <YAxis tickLine={false} axisLine={false} width={70} />
+                <Tooltip contentStyle={{ borderRadius: 6, borderColor: "#b8cee3" }} />
+                <Line
+                  type="monotone"
+                  dataKey={metric}
+                  stroke={selectedMetric.color}
+                  strokeWidth={3}
+                  dot={{ r: 5, fill: selectedMetric.color }}
+                />
+              </RechartsLineChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
+      </section>
+
+      <section className="country-section" id="countries">
+        <div className="section-heading">
+          <div>
+            <span>Latest comparison</span>
+            <h2>Country overview</h2>
+          </div>
+          <p>{latestYear}</p>
+        </div>
+        <div className="compare-grid">
+          <div className="chart-frame compact">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={summary} margin={{ left: 0, right: 10, top: 18, bottom: 8 }}>
+                <CartesianGrid stroke="#d6e4f2" strokeDasharray="4 4" vertical={false} />
+                <XAxis dataKey="country" tickLine={false} axisLine={false} />
+                <YAxis tickLine={false} axisLine={false} width={70} />
+                <Tooltip contentStyle={{ borderRadius: 6, borderColor: "#b8cee3" }} />
+                <Bar dataKey="life_expectancy" fill="#005eb8" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Country</th>
+                  <th>Life</th>
+                  <th>Diabetes</th>
+                  <th>Risk</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summary.map((row) => (
+                  <tr key={row.iso_code}>
+                    <td>{row.country}</td>
+                    <td>{formatNumber(row.life_expectancy)}</td>
+                    <td>{formatNumber(row.diabetes_prevalence, "%")}</td>
+                    <td>{formatNumber(row.health_risk_score)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function MetricCard({
+  icon,
+  label,
+  value,
+  detail,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  detail?: string;
+}) {
+  return (
+    <article className="metric-card">
+      <span className="metric-icon" aria-hidden="true">
+        {icon}
+      </span>
+      <div>
+        <p>{label}</p>
+        <strong>{value}</strong>
+        {detail ? <small>{detail}</small> : null}
+      </div>
+    </article>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);
