@@ -85,12 +85,18 @@ Run everything with one command on Windows:
 .\start.ps1
 ```
 
-This starts the API and React frontend, then opens the frontend in your browser.
+This loads the current OWID dataset, starts the API and React frontend, then opens the frontend in your browser. If OWID is unavailable, the script falls back to the sample dataset.
 
-Optional PostgreSQL/OWID run:
+Optional PostgreSQL run:
 
 ```powershell
-.\start.ps1 -WithPostgres -UseOwid
+.\start.ps1 -WithPostgres
+```
+
+Use the bundled sample dataset:
+
+```powershell
+.\start.ps1 -UseSample
 ```
 
 Run the legacy Streamlit dashboard instead:

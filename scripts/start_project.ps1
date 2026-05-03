@@ -1,5 +1,6 @@
 param(
     [switch]$WithPostgres,
+    [switch]$UseSample,
     [switch]$UseOwid,
     [switch]$WriteDb,
     [switch]$UseStreamlit,
@@ -32,17 +33,26 @@ if ($WithPostgres -or $WriteDb) {
     docker compose up -d postgres
 }
 
-if ($UseOwid -or $WriteDb) {
+if ($UseSample) {
+    Write-Host "Loading sample data..."
+    & $venvPython -m src.ingestion.load_sample
+}
+else {
     $owidArgs = @("-m", "src.ingestion.load_owid")
     if ($WriteDb) {
         $owidArgs += "--write-db"
     }
-    Write-Host "Loading OWID data..."
-    & $venvPython @owidArgs
-}
-else {
-    Write-Host "Loading sample data..."
-    & $venvPython -m src.ingestion.load_sample
+    Write-Host "Loading current OWID data..."
+    try {
+        & $venvPython @owidArgs
+        if ($LASTEXITCODE -ne 0) {
+            throw "OWID loader exited with code $LASTEXITCODE"
+        }
+    }
+    catch {
+        Write-Host "OWID load failed; falling back to sample data."
+        & $venvPython -m src.ingestion.load_sample
+    }
 }
 
 $logDir = Join-Path $projectRoot ".logs"

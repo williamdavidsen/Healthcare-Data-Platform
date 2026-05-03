@@ -89,10 +89,19 @@ def merge_indicator_frames(frames: list[pd.DataFrame], start_year: int = 2000) -
 
     merged = frames[0]
     for frame in frames[1:]:
-        merged = merged.merge(frame, on=["country", "iso_code", "year"], how="inner")
+        merged = merged.merge(frame, on=["country", "iso_code", "year"], how="outer")
 
     merged["year"] = merged["year"].astype(int)
-    merged = merged[merged["year"] >= start_year]
+    merged = merged.sort_values(["country", "iso_code", "year"])
+    value_columns = [
+        column
+        for column in merged.columns
+        if column not in {"country", "iso_code", "year"}
+    ]
+    merged[value_columns] = merged.groupby(["country", "iso_code"], sort=False)[
+        value_columns
+    ].ffill()
+    merged = merged[merged["year"] >= start_year].dropna(subset=value_columns)
     merged = merged.sort_values(["country", "year"]).reset_index(drop=True)
     validate_health_indicators(merged)
     return merged

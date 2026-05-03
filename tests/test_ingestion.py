@@ -70,3 +70,54 @@ def test_merge_indicator_frames_creates_valid_health_indicators():
     assert len(result) == 1
     assert result.loc[0, "country"] == "Norway"
     assert result.loc[0, "year"] == 2020
+
+
+def test_merge_indicator_frames_carries_latest_known_values_forward():
+    frames = [
+        pd.DataFrame(
+            {
+                "country": ["Norway", "Norway"],
+                "iso_code": ["NOR", "NOR"],
+                "year": [2021, 2024],
+                "life_expectancy": [83.2, 83.6],
+            }
+        ),
+        pd.DataFrame(
+            {
+                "country": ["Norway"],
+                "iso_code": ["NOR"],
+                "year": [2021],
+                "diabetes_prevalence": [5.4],
+            }
+        ),
+        pd.DataFrame(
+            {
+                "country": ["Norway"],
+                "iso_code": ["NOR"],
+                "year": [2022],
+                "obesity_rate": [23.7],
+            }
+        ),
+        pd.DataFrame(
+            {
+                "country": ["Norway"],
+                "iso_code": ["NOR"],
+                "year": [2024],
+                "health_spending_per_capita": [8500.0],
+            }
+        ),
+        pd.DataFrame(
+            {
+                "country": ["Norway"],
+                "iso_code": ["NOR"],
+                "year": [2024],
+                "gdp_per_capita": [90000.0],
+            }
+        ),
+    ]
+
+    result = merge_indicator_frames(frames, start_year=2020)
+
+    latest = result[result["year"] == 2024].iloc[0]
+    assert latest["diabetes_prevalence"] == 5.4
+    assert latest["obesity_rate"] == 23.7
