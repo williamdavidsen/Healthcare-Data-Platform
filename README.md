@@ -85,6 +85,24 @@ Run the sample ingestion:
 python -m src.ingestion.load_sample
 ```
 
+Run the OWID ingestion:
+
+```bash
+python -m src.ingestion.load_owid
+```
+
+Start PostgreSQL:
+
+```bash
+docker compose up -d postgres
+```
+
+Load OWID data and write it to PostgreSQL:
+
+```bash
+python -m src.ingestion.load_owid --write-db
+```
+
 Run tests:
 
 ```bash
@@ -105,7 +123,7 @@ uvicorn api.main:app --reload
 
 ## Data Sources
 
-- Our World in Data
+- Our World in Data: life expectancy, diabetes prevalence, adult obesity prevalence, health spending per capita, GDP per capita
 - World Health Organization Global Health Observatory
 - Centers for Disease Control and Prevention
 
