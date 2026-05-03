@@ -79,6 +79,26 @@ Create and activate a virtual environment, then install dependencies:
 pip install -r requirements.txt
 ```
 
+Run everything with one command on Windows:
+
+```powershell
+.\start.ps1
+```
+
+This starts the API and React frontend, then opens the frontend in your browser.
+
+Optional PostgreSQL/OWID run:
+
+```powershell
+.\start.ps1 -WithPostgres -UseOwid
+```
+
+Run the legacy Streamlit dashboard instead:
+
+```powershell
+.\start.ps1 -UseStreamlit
+```
+
 Run the sample ingestion:
 
 ```bash
@@ -113,6 +133,14 @@ Run the dashboard:
 
 ```bash
 streamlit run dashboard/app.py
+```
+
+Run the React frontend:
+
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
 Run the API:

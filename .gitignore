@@ -21,6 +21,10 @@ data/processed/*.csv
 # Runtime logs
 logs-*.txt
 
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
 # dbt
 dbt/target/
 dbt/dbt_packages/
@@ -34,3 +38,6 @@ Thumbs.db
 
 # Local notes
 GENEL BAKIS.docx
+
+# Local run logs
+.logs/
