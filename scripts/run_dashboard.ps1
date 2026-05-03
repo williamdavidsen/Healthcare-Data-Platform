@@ -4,4 +4,10 @@ $ErrorActionPreference = "Stop"
 $projectRoot = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")
 Set-Location -LiteralPath $projectRoot
 
-python -m streamlit run dashboard/app.py --server.headless true --server.port 8502
+$venvPython = Join-Path $projectRoot ".venv/Scripts/python.exe"
+if (Test-Path -LiteralPath $venvPython) {
+    & $venvPython -m streamlit run dashboard/app.py --server.headless true --server.port 8502
+}
+else {
+    python -m streamlit run dashboard/app.py --server.headless true --server.port 8502
+}

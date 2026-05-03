@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.analytics import add_health_risk_score, country_summary
 from src.config import PROCESSED_DATASET, SAMPLE_DATASET
@@ -9,6 +10,13 @@ from src.validation import validate_health_indicators
 
 
 app = FastAPI(title="Healthcare Data Platform API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def load_dataset() -> pd.DataFrame:
