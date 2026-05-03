@@ -4,6 +4,7 @@ import {
   Activity,
   BarChart3,
   ChevronDown,
+  ChevronsUpDown,
   CircleDollarSign,
   Database,
   HeartPulse,
@@ -53,6 +54,8 @@ const metrics = [
 ] as const;
 
 type MetricKey = (typeof metrics)[number]["key"];
+type SortKey = "country" | "life_expectancy" | "diabetes_prevalence" | "health_risk_score";
+type SortDirection = "asc" | "desc";
 
 function formatNumber(value: number, unit?: string) {
   const formatted = new Intl.NumberFormat("en", {
@@ -68,6 +71,10 @@ function App() {
   const [trend, setTrend] = React.useState<SummaryRow[]>([]);
   const [metric, setMetric] = React.useState<MetricKey>("life_expectancy");
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const [tableSort, setTableSort] = React.useState<{
+    key: SortKey;
+    direction: SortDirection;
+  }>({ key: "life_expectancy", direction: "desc" });
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
 
@@ -124,6 +131,22 @@ function App() {
   const avgLifeExpectancy =
     summary.reduce((total, row) => total + row.life_expectancy, 0) / Math.max(summary.length, 1);
   const lowestRisk = [...summary].sort((a, b) => a.health_risk_score - b.health_risk_score)[0];
+  const sortedSummary = React.useMemo(() => {
+    return [...summary].sort((a, b) => {
+      const modifier = tableSort.direction === "asc" ? 1 : -1;
+      if (tableSort.key === "country") {
+        return a.country.localeCompare(b.country) * modifier;
+      }
+      return (a[tableSort.key] - b[tableSort.key]) * modifier;
+    });
+  }, [summary, tableSort]);
+
+  function updateTableSort(key: SortKey) {
+    setTableSort((current) => ({
+      key,
+      direction: current.key === key && current.direction === "desc" ? "asc" : "desc",
+    }));
+  }
 
   if (loading) {
     return (
@@ -212,7 +235,7 @@ function App() {
               </p>
               <ul>
                 <li>Spot long-term changes in life expectancy and risk factors.</li>
-                <li>Compare countries using the latest available dataset year.</li>
+                <li>Compare countries with the nearest published values for the current year.</li>
               </ul>
             </div>
           </div>
@@ -302,9 +325,9 @@ function App() {
         </aside>
 
         <section className="chart-panel">
-          <div className="section-heading">
+          <div className="section-heading chart-heading">
             <div>
-              <span>{country}</span>
+              <span className="context-pill">{country}</span>
               <h2>
                 <LineChart size={22} />
                 {selectedMetric.label} trend
@@ -333,9 +356,9 @@ function App() {
       </section>
 
       <section className="country-section" id="countries">
-        <div className="section-heading">
+        <div className="section-heading chart-heading">
           <div>
-            <span>Latest comparison</span>
+            <span className="context-pill">Latest comparison</span>
             <h2>
               <BarChart3 size={22} />
               Country overview
@@ -348,7 +371,13 @@ function App() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={summary} margin={{ left: 0, right: 10, top: 18, bottom: 8 }}>
                 <CartesianGrid stroke="#d6e4f2" strokeDasharray="4 4" vertical={false} />
-                <XAxis dataKey="country" tickLine={false} axisLine={false} />
+                <XAxis
+                  dataKey="country"
+                  tickLine={false}
+                  axisLine={false}
+                  interval="preserveStartEnd"
+                  minTickGap={28}
+                />
                 <YAxis tickLine={false} axisLine={false} width={70} />
                 <Tooltip contentStyle={{ borderRadius: 6, borderColor: "#b8cee3" }} />
                 <Bar dataKey="life_expectancy" fill="#005eb8" radius={[6, 6, 0, 0]} />
@@ -359,14 +388,34 @@ function App() {
             <table>
               <thead>
                 <tr>
-                  <th>Country</th>
-                  <th>Life</th>
-                  <th>Diabetes</th>
-                  <th>Risk</th>
+                  <SortableHeader
+                    active={tableSort.key === "country"}
+                    direction={tableSort.direction}
+                    label="Country"
+                    onClick={() => updateTableSort("country")}
+                  />
+                  <SortableHeader
+                    active={tableSort.key === "life_expectancy"}
+                    direction={tableSort.direction}
+                    label="Life"
+                    onClick={() => updateTableSort("life_expectancy")}
+                  />
+                  <SortableHeader
+                    active={tableSort.key === "diabetes_prevalence"}
+                    direction={tableSort.direction}
+                    label="Diabetes"
+                    onClick={() => updateTableSort("diabetes_prevalence")}
+                  />
+                  <SortableHeader
+                    active={tableSort.key === "health_risk_score"}
+                    direction={tableSort.direction}
+                    label="Risk"
+                    onClick={() => updateTableSort("health_risk_score")}
+                  />
                 </tr>
               </thead>
               <tbody>
-                {summary.map((row) => (
+                {sortedSummary.map((row) => (
                   <tr key={row.iso_code}>
                     <td>{row.country}</td>
                     <td>{formatNumber(row.life_expectancy)}</td>
@@ -380,6 +429,32 @@ function App() {
         </div>
       </section>
     </main>
+  );
+}
+
+function SortableHeader({
+  active,
+  direction,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  direction: SortDirection;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <th>
+      <button
+        className={`sort-button ${active ? "active" : ""}`}
+        type="button"
+        onClick={onClick}
+        aria-sort={active ? (direction === "asc" ? "ascending" : "descending") : "none"}
+      >
+        {label}
+        <ChevronsUpDown size={16} />
+      </button>
+    </th>
   );
 }
 

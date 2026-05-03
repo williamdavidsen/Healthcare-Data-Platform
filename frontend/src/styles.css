@@ -1,7 +1,9 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,650;9..144,750&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
 :root {
   color: #102b46;
   background: #f6f9fc;
-  font-family: "Source Sans 3", "Source Sans Pro", Arial, sans-serif;
+  font-family: "Plus Jakarta Sans", Arial, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
@@ -98,6 +100,7 @@ select {
 
 .brand strong {
   font-size: 1.05rem;
+  letter-spacing: 0;
 }
 
 .brand small {
@@ -233,15 +236,21 @@ select {
 .hero-summary-card h2 {
   margin: 0 0 8px;
   color: #06233f;
+  font-family: "Fraunces", "Plus Jakarta Sans", serif;
   font-size: 1.25rem;
+  font-weight: 650;
 }
 
 .hero-copy h1 {
   margin: 18px 0 0;
   color: #06233f;
+  font-family: "Fraunces", "Plus Jakarta Sans", serif;
   font-size: clamp(2.25rem, 4.35vw, 4.15rem);
-  line-height: 1.01;
+  font-weight: 750;
+  line-height: 1.03;
   letter-spacing: 0;
+  text-wrap: balance;
+  text-shadow: 0 1px 0 #ffffff;
 }
 
 .hero-copy p {
@@ -262,6 +271,7 @@ select {
 .eyebrow {
   color: #005eb8;
   font-weight: 700;
+  text-shadow: 0 1px 0 #ffffff;
 }
 
 .hero-actions {
@@ -276,6 +286,7 @@ select {
   border-radius: 6px;
   padding: 0 18px;
   font-weight: 700;
+  letter-spacing: 0;
 }
 
 .primary-action {
@@ -349,6 +360,7 @@ select {
   color: #06233f;
   font-size: 1.35rem;
   text-align: right;
+  letter-spacing: 0;
 }
 
 .hero-info-card {
@@ -372,7 +384,9 @@ select {
 
 .hero-info-card h2 {
   color: #06233f;
+  font-family: "Fraunces", "Plus Jakarta Sans", serif;
   font-size: 1.25rem;
+  font-weight: 650;
 }
 
 .hero-info-card p {
@@ -463,6 +477,7 @@ select {
   margin-top: 6px;
   color: #06233f;
   font-size: 1.6rem;
+  letter-spacing: 0;
 }
 
 .metric-card small {
@@ -563,6 +578,31 @@ select:focus {
   margin-bottom: 18px;
 }
 
+.chart-heading {
+  align-items: flex-start;
+}
+
+.chart-heading > div {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.context-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 32px;
+  border: 1px solid #d6e4f2;
+  border-radius: 999px;
+  background: #f6f9fc;
+  color: #27435d;
+  padding: 0 12px;
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
 .section-heading h2,
 .section-heading p {
   margin: 0;
@@ -572,9 +612,11 @@ select:focus {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  margin-top: 4px;
   color: #06233f;
+  font-family: "Fraunces", "Plus Jakarta Sans", serif;
   font-size: 1.55rem;
+  font-weight: 650;
+  line-height: 1.15;
 }
 
 .section-heading h2 svg {
@@ -629,6 +671,48 @@ th {
   background: #eaf3fb;
   color: #27435d;
   font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.sort-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 0;
+  text-align: left;
+}
+
+.sort-button svg {
+  flex: 0 0 auto;
+  color: #5c7185;
+  transition:
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.sort-button:hover,
+.sort-button:focus-visible {
+  color: #005eb8;
+  outline: 2px solid #cfe6ff;
+  outline-offset: 3px;
+}
+
+.sort-button.active {
+  color: #005eb8;
+}
+
+.sort-button.active svg {
+  color: #005eb8;
+  transform: rotate(180deg);
 }
 
 td {
@@ -748,5 +832,14 @@ tbody tr:hover {
   .chart-panel,
   .country-section {
     padding: 18px;
+  }
+
+  .section-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .section-heading h2 {
+    font-size: 1.35rem;
   }
 }
