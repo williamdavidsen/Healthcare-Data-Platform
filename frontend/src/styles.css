@@ -19,8 +19,10 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
+    radial-gradient(circle at 1px 1px, rgb(0 94 184 / 8%) 1px, transparent 0),
     linear-gradient(180deg, #eaf3fb 0, #f6f9fc 420px),
     #f6f9fc;
+  background-size: 28px 28px, auto, auto;
 }
 
 a {
@@ -60,6 +62,11 @@ select {
   justify-content: space-between;
   gap: 20px;
   min-height: 68px;
+  border: 1px solid #d6e4f2;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgb(16 43 70 / 7%);
+  padding: 10px 12px 10px 14px;
 }
 
 .brand {
@@ -74,7 +81,7 @@ select {
   flex: 0 0 auto;
   place-items: center;
   border-radius: 50%;
-  background: #ffffff;
+  background: #eaf3fb;
   color: #005eb8;
   box-shadow: 0 1px 0 #d6e4f2;
 }
@@ -102,42 +109,145 @@ select {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.menu-toggle {
+  display: none;
+  width: 46px;
+  height: 46px;
+  border: 1px solid #d6e4f2;
+  border-radius: 8px;
+  background: #eaf3fb;
+  color: #005eb8;
+  cursor: pointer;
+  place-items: center;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.menu-toggle:hover,
+.menu-toggle:focus-visible {
+  background: #005eb8;
+  color: #ffffff;
+  outline: 3px solid #cfe6ff;
+}
+
+.menu-toggle:active {
+  transform: scale(0.96);
 }
 
 .nav-links a {
-  border-radius: 999px;
+  border-radius: 6px;
   color: #27435d;
   padding: 10px 14px;
 }
 
 .nav-links a:hover,
 .nav-links a:focus-visible {
-  background: #ffffff;
+  background: #eaf3fb;
+  color: #005eb8;
   outline: 2px solid transparent;
 }
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
   gap: 28px;
-  align-items: end;
+  align-items: stretch;
   padding: 56px 0 26px;
 }
 
-.hero-copy h1 {
-  max-width: 740px;
-  margin: 18px 0 16px;
+.hero-copy,
+.hero-side {
+  display: grid;
+  gap: 16px;
+}
+
+.hero-title-card,
+.hero-summary-card,
+.hero-info-card,
+.hero-panel,
+.metric-card,
+.control-panel,
+.chart-panel,
+.country-section {
+  border: 1px solid #d6e4f2;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 14px 38px rgb(16 43 70 / 8%);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.hero-title-card:hover,
+.hero-summary-card:hover,
+.hero-info-card:hover,
+.hero-panel:hover,
+.metric-card:hover,
+.control-panel:hover,
+.chart-panel:hover,
+.country-section:hover {
+  border-color: #b8cee3;
+  box-shadow: 0 18px 44px rgb(16 43 70 / 10%);
+}
+
+.hero-title-card {
+  position: relative;
+  overflow: hidden;
+  padding: 28px 30px 30px;
+}
+
+.hero-title-card::before,
+.hero-summary-card::before,
+.hero-info-card::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  content: "";
+}
+
+.hero-title-card::before {
+  background: #005eb8;
+}
+
+.hero-summary-card {
+  position: relative;
+  display: flex;
+  gap: 18px;
+  align-content: start;
+  align-items: flex-start;
+  overflow: hidden;
+  padding: 24px 26px;
+}
+
+.hero-summary-card::before {
+  background: #007c89;
+}
+
+.hero-summary-card h2 {
+  margin: 0 0 8px;
   color: #06233f;
-  font-size: clamp(2.4rem, 5vw, 4.9rem);
+  font-size: 1.25rem;
+}
+
+.hero-copy h1 {
+  margin: 18px 0 0;
+  color: #06233f;
+  font-size: clamp(2.25rem, 4.35vw, 4.15rem);
   line-height: 1.01;
   letter-spacing: 0;
 }
 
 .hero-copy p {
-  max-width: 680px;
   margin: 0;
   color: #304a63;
-  font-size: 1.2rem;
+  font-size: 1.12rem;
   line-height: 1.6;
 }
 
@@ -158,7 +268,6 @@ select {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 28px;
 }
 
 .primary-action,
@@ -174,20 +283,15 @@ select {
   color: #ffffff;
 }
 
+.primary-action:hover,
+.primary-action:focus-visible {
+  background: #004f9c;
+  outline: 3px solid #cfe6ff;
+}
+
 .secondary-action {
   border: 2px solid #005eb8;
   color: #005eb8;
-}
-
-.hero-panel,
-.metric-card,
-.control-panel,
-.chart-panel,
-.country-section {
-  border: 1px solid #d6e4f2;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 14px 38px rgb(16 43 70 / 8%);
 }
 
 .hero-panel {
@@ -198,10 +302,19 @@ select {
 
 .hero-panel div {
   display: flex;
-  justify-content: space-between;
-  gap: 18px;
+  align-items: center;
+  gap: 14px;
   padding: 22px;
   background: #ffffff;
+}
+
+.hero-panel p {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+  margin: 0;
 }
 
 .hero-panel span,
@@ -211,10 +324,87 @@ select {
   font-weight: 700;
 }
 
+.panel-icon,
+.card-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #eaf3fb;
+  color: #005eb8;
+  box-shadow: 0 1px 0 #d6e4f2;
+}
+
+.panel-icon {
+  width: 42px;
+  height: 42px;
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+}
+
 .hero-panel strong {
   color: #06233f;
   font-size: 1.35rem;
   text-align: right;
+}
+
+.hero-info-card {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  overflow: hidden;
+  padding: 26px 28px 24px;
+}
+
+.hero-info-card::before {
+  background: #b0005a;
+}
+
+.hero-info-card h2,
+.hero-info-card p,
+.hero-info-card ul {
+  margin: 0;
+}
+
+.hero-info-card h2 {
+  color: #06233f;
+  font-size: 1.25rem;
+}
+
+.hero-info-card p {
+  margin-top: 8px;
+  color: #304a63;
+  line-height: 1.55;
+}
+
+.hero-info-card ul {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 0;
+  color: #304a63;
+  list-style: none;
+}
+
+.hero-info-card li {
+  position: relative;
+  padding-left: 20px;
+  line-height: 1.45;
+}
+
+.hero-info-card li::before {
+  position: absolute;
+  top: 0.55em;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #007c89;
+  content: "";
 }
 
 .error-state {
@@ -232,11 +422,29 @@ select {
 }
 
 .metric-card {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 16px;
   min-height: 124px;
   padding: 22px;
+}
+
+.metric-card::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: #005eb8;
+  content: "";
+}
+
+.metric-card:nth-child(2)::before {
+  background: #007c89;
+}
+
+.metric-card:nth-child(3)::before {
+  background: #6b4eff;
 }
 
 .metric-icon {
@@ -314,6 +522,8 @@ select:focus {
 }
 
 .metric-picker button {
+  position: relative;
+  overflow: hidden;
   min-height: 44px;
   border: 1px solid #d6e4f2;
   border-radius: 6px;
@@ -330,6 +540,14 @@ select:focus {
   background: #eaf3fb;
   color: #005eb8;
   font-weight: 700;
+}
+
+.metric-picker button.active::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: #005eb8;
+  content: "";
 }
 
 .chart-panel,
@@ -351,9 +569,16 @@ select:focus {
 }
 
 .section-heading h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   margin-top: 4px;
   color: #06233f;
   font-size: 1.55rem;
+}
+
+.section-heading h2 svg {
+  color: #005eb8;
 }
 
 .section-heading p {
@@ -414,6 +639,14 @@ tbody tr:last-child td {
   border-bottom: 0;
 }
 
+tbody tr {
+  transition: background 150ms ease;
+}
+
+tbody tr:hover {
+  background: #f6f9fc;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -445,17 +678,55 @@ tbody tr:last-child td {
 
   .topbar,
   .nav-links {
-    align-items: flex-start;
+    align-items: stretch;
   }
 
   .topbar {
-    flex-direction: column;
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .brand {
+    min-width: 0;
+  }
+
+  .menu-toggle {
+    display: grid;
   }
 
   .nav-links {
+    grid-column: 1 / -1;
     width: 100%;
-    overflow-x: auto;
-    padding-bottom: 4px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: translateY(-8px);
+    transition:
+      max-height 260ms ease,
+      opacity 180ms ease,
+      transform 220ms ease;
+    pointer-events: none;
+  }
+
+  .nav-links.open {
+    max-height: 80px;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .nav-links a {
+    display: grid;
+    min-height: 42px;
+    place-items: center;
+    padding: 0 8px;
+    text-align: center;
   }
 
   .hero-copy h1 {
@@ -466,6 +737,9 @@ tbody tr:last-child td {
     font-size: 1.05rem;
   }
 
+  .hero-title-card,
+  .hero-summary-card,
+  .hero-info-card,
   .hero-panel div,
   .metric-card {
     padding: 18px;

@@ -2,13 +2,20 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import {
   Activity,
+  BarChart3,
   ChevronDown,
   CircleDollarSign,
   Database,
   HeartPulse,
   LineChart,
+  MapPinned,
+  Menu,
   ShieldCheck,
+  Sparkles,
   Stethoscope,
+  X,
+  TrendingUp,
+  Trophy,
 } from "lucide-react";
 import {
   Bar,
@@ -60,6 +67,7 @@ function App() {
   const [country, setCountry] = React.useState("");
   const [trend, setTrend] = React.useState<SummaryRow[]>([]);
   const [metric, setMetric] = React.useState<MetricKey>("life_expectancy");
+  const [menuOpen, setMenuOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
 
@@ -137,46 +145,105 @@ function App() {
             <small>Public health indicators</small>
           </span>
         </a>
-        <nav className="nav-links" aria-label="Primary navigation">
-          <a href="#overview">Overview</a>
-          <a href="#trend">Trend</a>
-          <a href="#countries">Countries</a>
+        <button
+          className="menu-toggle"
+          type="button"
+          aria-expanded={menuOpen}
+          aria-controls="primary-navigation"
+          aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+        <nav
+          className={`nav-links ${menuOpen ? "open" : ""}`}
+          id="primary-navigation"
+          aria-label="Primary navigation"
+        >
+          <a href="#overview" onClick={() => setMenuOpen(false)}>
+            Overview
+          </a>
+          <a href="#trend" onClick={() => setMenuOpen(false)}>
+            Trend
+          </a>
+          <a href="#countries" onClick={() => setMenuOpen(false)}>
+            Countries
+          </a>
         </nav>
       </header>
 
       <section className="hero" id="overview">
         <div className="hero-copy">
-          <span className="eyebrow">
-            <ShieldCheck size={18} /> Validated analytics dataset
-          </span>
-          <h1>Understand country health trends at a glance.</h1>
-          <p>
-            A clean dashboard for comparing life expectancy, diabetes, obesity,
-            spending and GDP across public health datasets.
-          </p>
-          <div className="hero-actions">
-            <a className="primary-action" href="#trend">
-              Explore trends
-              <LineChart size={19} />
-            </a>
-            <a className="secondary-action" href={`${API_BASE}/docs`}>
-              API docs
-              <Database size={18} />
-            </a>
+          <div className="hero-title-card">
+            <span className="eyebrow">
+              <ShieldCheck size={18} /> Validated analytics dataset
+            </span>
+            <h1>Understand country health trends at a glance.</h1>
+          </div>
+          <div className="hero-summary-card">
+            <span className="card-icon" aria-hidden="true">
+              <Sparkles size={22} />
+            </span>
+            <div>
+              <h2>Quick comparison</h2>
+              <p>
+                Compare life expectancy, diabetes, obesity, health spending and
+                GDP across public health datasets.
+              </p>
+              <div className="hero-actions">
+                <a className="primary-action" href="#trend">
+                  Explore trends
+                  <LineChart size={19} />
+                </a>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="hero-panel" aria-label="Key project status">
-          <div>
-            <span>Dataset year</span>
-            <strong>{latestYear}</strong>
+        <div className="hero-side">
+          <div className="hero-info-card">
+            <span className="card-icon" aria-hidden="true">
+              <TrendingUp size={22} />
+            </span>
+            <div>
+              <h2>How to use this view</h2>
+              <p>
+                See the newest country-level health data, choose a country, and
+                compare how key indicators change over time.
+              </p>
+              <ul>
+                <li>Spot long-term changes in life expectancy and risk factors.</li>
+                <li>Compare countries using the latest available dataset year.</li>
+              </ul>
+            </div>
           </div>
-          <div>
-            <span>Countries</span>
-            <strong>{countries.length}</strong>
-          </div>
-          <div>
-            <span>Best risk profile</span>
-            <strong>{lowestRisk?.country ?? "N/A"}</strong>
+          <div className="hero-panel" aria-label="Key project status">
+            <div>
+              <span className="panel-icon" aria-hidden="true">
+                <Database size={20} />
+              </span>
+              <p>
+                <span>Dataset year</span>
+                <strong>{latestYear}</strong>
+              </p>
+            </div>
+            <div>
+              <span className="panel-icon" aria-hidden="true">
+                <MapPinned size={20} />
+              </span>
+              <p>
+                <span>Countries</span>
+                <strong>{countries.length}</strong>
+              </p>
+            </div>
+            <div>
+              <span className="panel-icon" aria-hidden="true">
+                <Trophy size={20} />
+              </span>
+              <p>
+                <span>Best risk profile</span>
+                <strong>{lowestRisk?.country ?? "N/A"}</strong>
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -184,26 +251,28 @@ function App() {
       {error ? <p className="error-state">{error}</p> : null}
 
       <section className="stat-grid" aria-label="Headline metrics">
-        <MetricCard
-          icon={<Stethoscope />}
-          label="Average life expectancy"
-          value={formatNumber(avgLifeExpectancy, "years")}
-        />
+          <MetricCard
+            icon={<Stethoscope />}
+            label="Average life expectancy"
+            value={formatNumber(avgLifeExpectancy, "years")}
+            detail="Latest dataset average"
+          />
         <MetricCard
           icon={<Activity />}
           label="Selected country"
           value={selectedCountry?.country ?? country}
           detail={selectedCountry ? `${selectedCountry.iso_code} / ${selectedCountry.year}` : ""}
         />
-        <MetricCard
-          icon={<CircleDollarSign />}
-          label="Health spending"
+          <MetricCard
+            icon={<CircleDollarSign />}
+            label="Health spending"
           value={
             selectedCountry
               ? formatNumber(selectedCountry.health_spending_per_capita, "USD")
               : "N/A"
-          }
-        />
+            }
+            detail="Per person"
+          />
       </section>
 
       <section className="workspace" id="trend">
@@ -236,7 +305,10 @@ function App() {
           <div className="section-heading">
             <div>
               <span>{country}</span>
-              <h2>{selectedMetric.label} trend</h2>
+              <h2>
+                <LineChart size={22} />
+                {selectedMetric.label} trend
+              </h2>
             </div>
             <p>{selectedMetric.unit}</p>
           </div>
@@ -264,7 +336,10 @@ function App() {
         <div className="section-heading">
           <div>
             <span>Latest comparison</span>
-            <h2>Country overview</h2>
+            <h2>
+              <BarChart3 size={22} />
+              Country overview
+            </h2>
           </div>
           <p>{latestYear}</p>
         </div>
