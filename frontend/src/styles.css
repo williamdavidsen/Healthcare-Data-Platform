@@ -681,6 +681,43 @@ select:focus {
   height: 320px;
 }
 
+.country-bar {
+  cursor: pointer;
+}
+
+.country-tooltip {
+  display: grid;
+  gap: 4px;
+  min-width: 180px;
+  border: 1px solid #b8cee3;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #102b46;
+  box-shadow: 0 18px 34px rgba(0, 39, 72, 0.14);
+  padding: 12px 14px;
+}
+
+.country-tooltip strong,
+.country-tooltip span,
+.country-tooltip small {
+  display: block;
+  margin: 0;
+}
+
+.country-tooltip strong {
+  color: #06233f;
+  font-weight: 900;
+}
+
+.country-tooltip span {
+  color: #005eb8;
+}
+
+.country-tooltip small {
+  color: #5c7185;
+  font-weight: 700;
+}
+
 .country-section {
   margin-top: 18px;
 }
@@ -768,11 +805,33 @@ tbody tr:last-child td {
 }
 
 tbody tr {
-  transition: background 150ms ease;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    box-shadow 150ms ease;
 }
 
 tbody tr:hover {
   background: #f6f9fc;
+}
+
+tbody tr.selected-row {
+  background: linear-gradient(90deg, #eaf3fb 0%, #fff5fa 100%);
+  box-shadow: inset 5px 0 0 #b0005a;
+}
+
+tbody tr.selected-row td {
+  color: #06233f;
+  font-weight: 900;
+}
+
+tbody tr.selected-row td:first-child {
+  color: #b0005a;
+}
+
+tbody tr:focus-visible {
+  outline: 3px solid #cfe6ff;
+  outline-offset: -3px;
 }
 
 @keyframes spin {

@@ -24,6 +24,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   Line,
   LineChart as RechartsLineChart,
   ResponsiveContainer,
@@ -179,13 +180,19 @@ function App() {
   const lowestRisk = [...summary].sort((a, b) => a.health_risk_score - b.health_risk_score)[0];
   const sortedSummary = React.useMemo(() => {
     return [...summary].sort((a, b) => {
+      if (a.country === country && b.country !== country) {
+        return -1;
+      }
+      if (b.country === country && a.country !== country) {
+        return 1;
+      }
       const modifier = tableSort.direction === "asc" ? 1 : -1;
       if (tableSort.key === "country") {
         return a.country.localeCompare(b.country) * modifier;
       }
       return (a[tableSort.key] - b[tableSort.key]) * modifier;
     });
-  }, [summary, tableSort]);
+  }, [country, summary, tableSort]);
 
   function updateTableSort(key: SortKey) {
     setTableSort((current) => ({
@@ -470,8 +477,20 @@ function App() {
                   minTickGap={28}
                 />
                 <YAxis tickLine={false} axisLine={false} width={70} />
-                <Tooltip contentStyle={{ borderRadius: 6, borderColor: "#b8cee3" }} />
-                <Bar dataKey="life_expectancy" fill="#005eb8" radius={[6, 6, 0, 0]} />
+                <Tooltip content={<CountryTooltip />} cursor={{ fill: "rgba(0, 94, 184, 0.08)" }} />
+                <Bar
+                  dataKey="life_expectancy"
+                  radius={[6, 6, 0, 0]}
+                  onClick={(row: SummaryRow) => setCountry(row.country)}
+                  className="country-bar"
+                >
+                  {summary.map((row) => (
+                    <Cell
+                      key={row.iso_code}
+                      fill={row.country === country ? "#b0005a" : "#005eb8"}
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -507,7 +526,18 @@ function App() {
               </thead>
               <tbody>
                 {sortedSummary.map((row) => (
-                  <tr key={row.iso_code}>
+                  <tr
+                    key={row.iso_code}
+                    className={row.country === country ? "selected-row" : ""}
+                    onClick={() => setCountry(row.country)}
+                    tabIndex={0}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setCountry(row.country);
+                      }
+                    }}
+                  >
                     <td>{row.country}</td>
                     <td>{formatNumber(row.life_expectancy)}</td>
                     <td>{formatNumber(row.diabetes_prevalence, "%")}</td>
@@ -520,6 +550,27 @@ function App() {
         </div>
       </section>
     </main>
+  );
+}
+
+function CountryTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload: SummaryRow; value: number }>;
+}) {
+  if (!active || !payload?.length) {
+    return null;
+  }
+
+  const row = payload[0].payload;
+  return (
+    <div className="country-tooltip">
+      <strong>{row.country}</strong>
+      <span>Life expectancy: {formatNumber(row.life_expectancy, "years")}</span>
+      <small>Click bar to select</small>
+    </div>
   );
 }
 
