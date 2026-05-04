@@ -289,6 +289,7 @@ This repository is designed to show practical data engineering skills:
 - Realistic public data sources
 - Tested ingestion and validation code
 - React dashboard and API as user-facing outputs
+- Interactive React country comparison with clickable chart bars and highlighted selected-country table rows
 - PostgreSQL + dbt staging/mart modeling
 - Repeatable local pipeline with one-command startup
 - Full-stack Docker Compose services
