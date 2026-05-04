@@ -17,6 +17,12 @@ if ($LASTEXITCODE -ne 0) {
     throw "pytest failed with exit code $LASTEXITCODE"
 }
 
+Write-Host "Running Python lint..."
+& $venvPython -m ruff check .
+if ($LASTEXITCODE -ne 0) {
+    throw "ruff failed with exit code $LASTEXITCODE"
+}
+
 Write-Host "Building React frontend..."
 npm run build --prefix frontend
 if ($LASTEXITCODE -ne 0) {

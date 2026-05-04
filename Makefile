@@ -22,6 +22,7 @@ pipeline:
 
 check:
 	pytest
+	ruff check .
 	npm run build --prefix frontend
 	dbt parse --project-dir dbt --profiles-dir dbt
 
