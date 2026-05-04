@@ -2,8 +2,8 @@ import pandas as pd
 import pytest
 
 from src.analytics import add_health_risk_score
-from src.ingestion.load_sample import load_sample_dataset
 from src.ingestion.load_owid import OwidIndicator, load_indicator_frame, merge_indicator_frames
+from src.ingestion.load_sample import load_sample_dataset
 from src.validation import validate_health_indicators
 
 

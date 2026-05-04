@@ -8,7 +8,6 @@ from src.analytics import add_health_risk_score, correlation_matrix
 from src.config import PROCESSED_DATASET, SAMPLE_DATASET
 from src.validation import validate_health_indicators
 
-
 st.set_page_config(page_title="Healthcare Data Platform", layout="wide")
 
 

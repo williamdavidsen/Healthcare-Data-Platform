@@ -20,6 +20,7 @@ data/processed/*.csv
 
 # Runtime logs
 logs-*.txt
+backups/
 
 # Frontend
 frontend/node_modules/
@@ -39,6 +40,7 @@ Thumbs.db
 
 # Local notes
 GENEL BAKIS.docx
+~$*.docx
 
 # Local run logs
 .logs/

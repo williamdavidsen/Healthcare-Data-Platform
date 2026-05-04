@@ -1,0 +1,15 @@
+flowchart TD
+    owid[Our World in Data CSVs] --> ingest[Python ingestion]
+    who[WHO GHO connector] --> source_meta[Raw source metadata]
+    cdc[CDC Socrata connector] --> source_meta
+    ingest --> files[Processed CSV]
+    ingest --> raw[(PostgreSQL raw.health_indicators)]
+    raw --> stg[dbt stg_health_indicators]
+    stg --> mart[dbt mart_country_health_trends]
+    mart --> api[FastAPI analytics API]
+    files --> api
+    api --> advanced[Risk index, YoY, anomalies, freshness, quality]
+    api --> react[React dashboard]
+    api --> streamlit[Streamlit legacy dashboard]
+    schedule[GitHub Actions scheduled pipeline] --> ingest
+    backup[PostgreSQL backup/restore scripts] --> raw

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import pandas as pd
 
-
 REQUIRED_COLUMNS = {
     "country",
     "iso_code",

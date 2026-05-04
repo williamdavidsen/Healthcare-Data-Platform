@@ -7,6 +7,8 @@ import {
   ChevronsUpDown,
   CircleDollarSign,
   Database,
+  FileCheck2,
+  Gauge,
   HeartPulse,
   LineChart,
   MapPinned,
@@ -41,6 +43,7 @@ type SummaryRow = {
   health_spending_per_capita: number;
   gdp_per_capita: number;
   health_risk_score: number;
+  country_risk_index?: number;
 };
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8002";
@@ -57,6 +60,33 @@ type MetricKey = (typeof metrics)[number]["key"];
 type SortKey = "country" | "life_expectancy" | "diabetes_prevalence" | "health_risk_score";
 type SortDirection = "asc" | "desc";
 
+type FreshnessReport = {
+  latest_year: number;
+  earliest_year: number;
+  row_count: number;
+  country_count: number;
+  latest_country_count: number;
+  uses_carried_forward_values: boolean;
+};
+
+type QualityReport = {
+  passed: boolean;
+  row_count: number;
+  country_count: number;
+  year_min: number;
+  year_max: number;
+  duplicate_country_year_rows: number;
+  missing_values: Record<string, number>;
+};
+
+type Insight = {
+  title: string;
+  country: string;
+  year: number;
+  value: number;
+  unit: string;
+};
+
 function formatNumber(value: number, unit?: string) {
   const formatted = new Intl.NumberFormat("en", {
     maximumFractionDigits: value > 100 ? 0 : 1,
@@ -70,6 +100,9 @@ function App() {
   const [country, setCountry] = React.useState("");
   const [trend, setTrend] = React.useState<SummaryRow[]>([]);
   const [metric, setMetric] = React.useState<MetricKey>("life_expectancy");
+  const [freshness, setFreshness] = React.useState<FreshnessReport | null>(null);
+  const [quality, setQuality] = React.useState<QualityReport | null>(null);
+  const [insights, setInsights] = React.useState<Insight[]>([]);
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [tableSort, setTableSort] = React.useState<{
     key: SortKey;
@@ -81,12 +114,22 @@ function App() {
   React.useEffect(() => {
     async function loadInitialData() {
       try {
-        const [summaryResponse, countriesResponse] = await Promise.all([
-          fetch(`${API_BASE}/summary`),
-          fetch(`${API_BASE}/countries`),
-        ]);
+        const [summaryResponse, countriesResponse, freshnessResponse, qualityResponse, insightsResponse] =
+          await Promise.all([
+            fetch(`${API_BASE}/summary`),
+            fetch(`${API_BASE}/countries`),
+            fetch(`${API_BASE}/freshness`),
+            fetch(`${API_BASE}/quality`),
+            fetch(`${API_BASE}/insights`),
+          ]);
 
-        if (!summaryResponse.ok || !countriesResponse.ok) {
+        if (
+          !summaryResponse.ok ||
+          !countriesResponse.ok ||
+          !freshnessResponse.ok ||
+          !qualityResponse.ok ||
+          !insightsResponse.ok
+        ) {
           throw new Error("Could not load health indicators");
         }
 
@@ -95,6 +138,9 @@ function App() {
         setSummary(summaryData);
         setCountries(countryData);
         setCountry(countryData[0] ?? "");
+        setFreshness((await freshnessResponse.json()) as FreshnessReport);
+        setQuality((await qualityResponse.json()) as QualityReport);
+        setInsights((await insightsResponse.json()) as Insight[]);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
@@ -274,28 +320,73 @@ function App() {
       {error ? <p className="error-state">{error}</p> : null}
 
       <section className="stat-grid" aria-label="Headline metrics">
-          <MetricCard
-            icon={<Stethoscope />}
-            label="Average life expectancy"
-            value={formatNumber(avgLifeExpectancy, "years")}
-            detail="Latest dataset average"
-          />
+        <MetricCard
+          icon={<Stethoscope />}
+          label="Average life expectancy"
+          value={formatNumber(avgLifeExpectancy, "years")}
+          detail="Latest dataset average"
+        />
         <MetricCard
           icon={<Activity />}
           label="Selected country"
           value={selectedCountry?.country ?? country}
           detail={selectedCountry ? `${selectedCountry.iso_code} / ${selectedCountry.year}` : ""}
         />
-          <MetricCard
-            icon={<CircleDollarSign />}
-            label="Health spending"
+        <MetricCard
+          icon={<CircleDollarSign />}
+          label="Health spending"
           value={
             selectedCountry
               ? formatNumber(selectedCountry.health_spending_per_capita, "USD")
               : "N/A"
-            }
-            detail="Per person"
-          />
+          }
+          detail="Per person"
+        />
+      </section>
+
+      <section className="insight-grid" aria-label="Advanced analytics insights">
+        <article className="quality-card">
+          <span className="metric-icon" aria-hidden="true">
+            <FileCheck2 />
+          </span>
+          <div>
+            <p>Data quality</p>
+            <strong>{quality?.passed ? "Passed" : "Needs review"}</strong>
+            <small>
+              {quality
+                ? `${quality.row_count} rows, ${quality.duplicate_country_year_rows} duplicates`
+                : "Loading report"}
+            </small>
+          </div>
+        </article>
+        <article className="quality-card">
+          <span className="metric-icon" aria-hidden="true">
+            <Database />
+          </span>
+          <div>
+            <p>Freshness</p>
+            <strong>{freshness?.latest_year ?? latestYear}</strong>
+            <small>
+              {freshness
+                ? `${freshness.latest_country_count} countries with nearest current values`
+                : "Loading freshness"}
+            </small>
+          </div>
+        </article>
+        {insights.slice(0, 3).map((insight) => (
+          <article className="quality-card" key={`${insight.title}-${insight.country}`}>
+            <span className="metric-icon" aria-hidden="true">
+              <Gauge />
+            </span>
+            <div>
+              <p>{insight.title}</p>
+              <strong>{insight.country}</strong>
+              <small>
+                {formatNumber(insight.value, insight.unit)} / {insight.year}
+              </small>
+            </div>
+          </article>
+        ))}
       </section>
 
       <section className="workspace" id="trend">

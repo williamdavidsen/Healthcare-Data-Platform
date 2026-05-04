@@ -12,7 +12,7 @@ The goal is not medical diagnosis. The goal is clean data engineering: ingestion
 
 ```text
 Public datasets
-  OWID CSV
+  OWID CSV + WHO/CDC extension connectors
         |
         v
 Python ingestion
@@ -31,6 +31,8 @@ Analytics marts
         +--> Streamlit legacy dashboard
 ```
 
+Mermaid architecture source: [docs/architecture.mmd](docs/architecture.mmd)
+
 ## Tech Stack
 
 - Python: ingestion, validation, analytics helpers
@@ -41,7 +43,7 @@ Analytics marts
 - Streamlit: legacy dashboard
 - Docker Compose: local infrastructure
 - pytest: automated tests
-- GitHub Actions: CI checks
+- GitHub Actions: CI checks and scheduled pipeline run
 
 ## Project Roadmap
 
@@ -62,17 +64,20 @@ Analytics marts
 
 ### Phase 3: Production Polish
 
-- Add Prefect orchestration
-- Add CI checks for frontend and dbt
-- Add Docker Compose one-command startup for the full app
-- Add screenshots and architecture diagram
+- Add CI checks for frontend and dbt: complete
+- Add Docker Compose full-stack services: complete
+- Add one-command pipeline scripts: complete
+- Add screenshots and architecture diagram: complete
+- Add Prefect orchestration or equivalent workflow layer: local orchestration entrypoint added
 
 ### Phase 4: Advanced Extensions
 
-- Add WHO or CDC datasets
-- Add correlation analysis
-- Add simple risk index feature engineering
-- Add scheduled CI pipeline validation
+- Add WHO and CDC source connectors: complete
+- Add correlation analysis, risk index, year-over-year changes, anomaly detection: complete
+- Add data freshness and data quality endpoints: complete
+- Add API pagination and filtering: complete
+- Add PostgreSQL backup/restore scripts: complete
+- Add scheduled GitHub Actions pipeline validation: complete
 
 ## How To Run
 
@@ -122,6 +127,44 @@ Run dbt manually:
 .\scripts\run_dbt.ps1
 ```
 
+Run only the data pipeline:
+
+```powershell
+.\scripts\run_pipeline.ps1
+```
+
+Run local project checks:
+
+```powershell
+.\scripts\check_project.ps1
+```
+
+Run the full Docker stack with one command:
+
+```powershell
+.\scripts\start_docker.ps1
+```
+
+Run with Docker Compose:
+
+```bash
+docker compose up -d postgres
+docker compose --profile pipeline run --rm pipeline
+docker compose up -d api frontend
+```
+
+Run the Python orchestration entrypoint:
+
+```bash
+python -m src.orchestration.pipeline
+```
+
+Capture a dashboard screenshot:
+
+```powershell
+.\scripts\capture_screenshots.ps1
+```
+
 Use the bundled sample dataset:
 
 ```powershell
@@ -144,6 +187,18 @@ Run the OWID ingestion:
 
 ```bash
 python -m src.ingestion.load_owid
+```
+
+Download WHO Global Health Observatory metadata:
+
+```bash
+python -m src.ingestion.load_who --limit 100
+```
+
+Download CDC Data catalog metadata:
+
+```bash
+python -m src.ingestion.load_cdc --limit 100
 ```
 
 Start PostgreSQL:
@@ -196,11 +251,34 @@ Run the API:
 uvicorn api.main:app --reload
 ```
 
+Useful API endpoints:
+
+- `GET /summary?limit=100&offset=0&sort_by=life_expectancy&sort_dir=desc`
+- `GET /indicators?country=Norway&metric=life_expectancy`
+- `GET /trend?country=Norway`
+- `GET /freshness`
+- `GET /quality`
+- `GET /correlations`
+- `GET /insights`
+- `GET /anomalies?metric=health_risk_score`
+
+Back up PostgreSQL:
+
+```powershell
+.\scripts\backup_postgres.ps1
+```
+
+Restore PostgreSQL from a backup dump:
+
+```powershell
+.\scripts\restore_postgres.ps1 -BackupPath .\backups\healthcare-YYYYMMDD_HHMMSS.dump
+```
+
 ## Data Sources
 
 - Our World in Data: life expectancy, diabetes prevalence, adult obesity prevalence, health spending per capita, GDP per capita
-- World Health Organization Global Health Observatory
-- Centers for Disease Control and Prevention
+- World Health Organization Global Health Observatory metadata and indicator connector
+- Centers for Disease Control and Prevention Data catalog and Socrata resource connector
 
 ## Portfolio Notes
 
@@ -213,12 +291,36 @@ This repository is designed to show practical data engineering skills:
 - React dashboard and API as user-facing outputs
 - PostgreSQL + dbt staging/mart modeling
 - Repeatable local pipeline with one-command startup
+- Full-stack Docker Compose services
+- Expanded CI for lint, tests, frontend build, and dbt
+- Advanced analytics endpoints for correlations, risk index, year-over-year changes, anomaly detection, freshness, and quality
+- Scheduled GitHub Actions pipeline workflow
+- PostgreSQL backup and restore scripts
+
+## Screenshots
+
+![Healthcare Data Platform dashboard](docs/screenshots/dashboard.png)
+
+Capture it locally with:
+
+```powershell
+.\scripts\capture_screenshots.ps1
+```
 
 ## Current Status
 
-Phase 2 is complete. The project can ingest OWID data, write it to PostgreSQL,
-run dbt staging and mart transformations, validate dbt models, and serve the
-analytics mart through FastAPI to the React dashboard.
+Phase 2 and Phase 3 are complete. Phase 4 advanced extensions are implemented.
+The project can ingest OWID data,
+write it to PostgreSQL, run dbt staging and mart transformations, validate dbt
+models, and serve the analytics mart through FastAPI to the React dashboard.
+
+Production polish now includes Docker Compose services for PostgreSQL, API,
+frontend, and a one-shot pipeline container, plus expanded CI checks for Python,
+frontend, and dbt. Advanced extensions add WHO/CDC connector entrypoints,
+correlation analysis, country risk index, year-over-year changes, anomaly
+detection, data freshness checks, a data quality dashboard section, API
+filtering/pagination, backup/restore scripts, and a scheduled GitHub Actions
+pipeline.
 
 The generated dataset is annual, not daily. For the current year, the pipeline
 uses the nearest published values available from the source datasets.

@@ -9,3 +9,4 @@ streamlit>=1.33
 plotly>=5.20
 pydantic>=2.6
 pytest>=8.1
+ruff>=0.8

@@ -8,11 +8,55 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: healthcare
+          POSTGRES_USER: healthcare
+          POSTGRES_PASSWORD: healthcare
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U healthcare -d healthcare"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
 
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
       - run: pip install -r requirements.txt
+      - run: ruff check .
       - run: pytest
+      - run: npm ci --prefix frontend
+      - run: npm run build --prefix frontend
+      - run: dbt parse --project-dir dbt --profiles-dir dbt
+      - name: Load sample data into PostgreSQL
+        env:
+          DATABASE_URL: postgresql://healthcare:healthcare@localhost:5432/healthcare
+        run: |
+          python - <<'PY'
+          from src.database import write_health_indicators_to_postgres
+          from src.ingestion.load_sample import load_sample_dataset
+
+          write_health_indicators_to_postgres(load_sample_dataset())
+          PY
+      - name: Run dbt models and tests
+        env:
+          DBT_POSTGRES_HOST: localhost
+          DBT_POSTGRES_USER: healthcare
+          DBT_POSTGRES_PASSWORD: healthcare
+          DBT_POSTGRES_DB: healthcare
+          DBT_POSTGRES_PORT: "5432"
+          DBT_POSTGRES_SCHEMA: analytics
+        run: |
+          dbt run --project-dir dbt --profiles-dir dbt
+          dbt test --project-dir dbt --profiles-dir dbt
