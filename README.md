@@ -12,7 +12,7 @@ The goal is not medical diagnosis. The goal is clean data engineering: ingestion
 
 ```text
 Public datasets
-  OWID CSV / WHO API / CDC API
+  OWID CSV
         |
         v
 Python ingestion
@@ -26,8 +26,9 @@ dbt transformations
         v
 Analytics marts
         |
-        +--> Streamlit dashboard
         +--> FastAPI analytics API
+        +--> React dashboard
+        +--> Streamlit legacy dashboard
 ```
 
 ## Tech Stack
@@ -35,8 +36,9 @@ Analytics marts
 - Python: ingestion, validation, analytics helpers
 - PostgreSQL: raw and modeled data storage
 - dbt: transformations and data modeling
-- Streamlit: interactive dashboard
 - FastAPI: lightweight analytics API
+- React + Vite: modern interactive dashboard
+- Streamlit: legacy dashboard
 - Docker Compose: local infrastructure
 - pytest: automated tests
 - GitHub Actions: CI checks
@@ -52,16 +54,17 @@ Analytics marts
 
 ### Phase 2: Real Pipeline
 
-- Add OWID CSV ingestion
-- Store raw data in PostgreSQL
-- Add dbt staging and marts
-- Add data quality checks
+- Add OWID CSV ingestion: complete
+- Store raw data in PostgreSQL: complete
+- Add dbt staging and mart models: complete
+- Add data quality checks: complete
+- Serve dbt mart data through the API: complete
 
 ### Phase 3: Production Polish
 
 - Add Prefect orchestration
-- Add FastAPI endpoints
-- Add Docker Compose one-command startup
+- Add CI checks for frontend and dbt
+- Add Docker Compose one-command startup for the full app
 - Add screenshots and architecture diagram
 
 ### Phase 4: Advanced Extensions
@@ -87,6 +90,11 @@ Run everything with one command on Windows:
 
 This loads the current OWID dataset, starts the API and React frontend, then opens the frontend in your browser. If OWID is unavailable, the script falls back to the sample dataset.
 
+Local URLs:
+
+- React dashboard: http://127.0.0.1:5173
+- FastAPI docs: http://127.0.0.1:8002/docs
+
 Optional PostgreSQL run:
 
 ```powershell
@@ -101,6 +109,12 @@ Write OWID data to PostgreSQL and build dbt models:
 
 When `-WriteDb` is used, the API reads from the dbt mart table:
 `analytics.mart_country_health_trends`.
+
+The database pipeline creates:
+
+- `raw.health_indicators`
+- `analytics.stg_health_indicators`
+- `analytics.mart_country_health_trends`
 
 Run dbt manually:
 
@@ -150,6 +164,18 @@ Run tests:
 pytest
 ```
 
+Run frontend build:
+
+```bash
+npm run build --prefix frontend
+```
+
+Run dbt after PostgreSQL is up and raw data is loaded:
+
+```powershell
+.\scripts\run_dbt.ps1
+```
+
 Run the dashboard:
 
 ```bash
@@ -184,8 +210,18 @@ This repository is designed to show practical data engineering skills:
 - Reproducible local setup
 - Realistic public data sources
 - Tested ingestion and validation code
-- Dashboard and API as user-facing outputs
-- dbt-ready modeling structure
+- React dashboard and API as user-facing outputs
+- PostgreSQL + dbt staging/mart modeling
+- Repeatable local pipeline with one-command startup
+
+## Current Status
+
+Phase 2 is complete. The project can ingest OWID data, write it to PostgreSQL,
+run dbt staging and mart transformations, validate dbt models, and serve the
+analytics mart through FastAPI to the React dashboard.
+
+The generated dataset is annual, not daily. For the current year, the pipeline
+uses the nearest published values available from the source datasets.
 
 ## Medical Disclaimer
 
