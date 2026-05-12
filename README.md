@@ -81,8 +81,9 @@ Data quality is checked in more than one place.
 - Empty datasets are rejected.
 - Missing `country` and `year` values are rejected.
 - Numeric columns are checked for correct types.
+- Metric ranges are checked so impossible values are caught.
 - pytest covers ingestion, analytics, and API behavior.
-- dbt parse and dbt tests run in CI.
+- dbt tests check duplicate country-year rows and invalid metric ranges.
 - API endpoints like `/quality` and `/freshness` show the current data status.
 
 I did not want this to be only a nice dashboard.
@@ -255,6 +256,7 @@ Useful endpoints:
 - `GET /summary?limit=100&offset=0&sort_by=life_expectancy&sort_dir=desc`
 - `GET /indicators?country=Norway&metric=life_expectancy`
 - `GET /trend?country=Norway`
+- `GET /metrics`
 - `GET /freshness`
 - `GET /quality`
 - `GET /correlations`
@@ -281,6 +283,7 @@ Useful endpoints:
 - Year-over-year changes
 - Anomaly detection
 - Freshness and quality endpoints
+- Metric catalog endpoint
 - Pagination and filtering
 - Backup and restore scripts
 - Docker Compose
@@ -301,9 +304,10 @@ Capture a screenshot locally:
 
 The project is working now.
 Python tests, ruff check, frontend build, and dbt parse all passed.
+Data quality checks now cover missing values, duplicate country-year rows, and invalid metric ranges.
 
 Phase 2 and Phase 3 are complete.
-Phase 4 advanced features are also implemented.
+Phase 4 advanced features are complete.
 
 The pipeline can ingest OWID data.
 It can write to PostgreSQL.
