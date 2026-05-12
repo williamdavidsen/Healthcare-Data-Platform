@@ -1,45 +1,44 @@
 # Healthcare Data Platform
 
-Bu proje benim uçtan uca bir healthcare data pipeline çalışmam.
-Public sağlık datalarını alıyor, temizliyor, kontrol ediyor, PostgreSQL ve dbt ile modele çeviriyor.
-Sonra bu datayı FastAPI ve React dashboard ile gösteriyor.
+This is my end-to-end healthcare data pipeline project.
+It takes public health data, validates it, stores it in PostgreSQL, models it with dbt, and shows the result through a FastAPI API and a React dashboard.
 
-Amacım medical karar vermek değil. Bu proje tanı koymaz.
-Ben burada daha çok gerçek bir data engineering iş akışını göstermek istedim.
+The goal is not medical diagnosis.
+The goal is to show a real data engineering workflow with ingestion, quality checks, modeling, API delivery, and a dashboard.
 
-## İşveren İçin Kısa Sonuç
+## Employer Summary
 
-Bu proje şunu gösteriyor:
+This project shows that I can build a data pipeline from source data to a usable product.
 
-- Ham data kaynaktan alınır.
-- Data kalite kontrollerinden geçer.
-- PostgreSQL'e yazılır.
-- dbt ile staging ve mart tabloları hazırlanır.
-- API bu mart datayı servis eder.
-- Dashboard bu datayı okunabilir hale getirir.
-- Testler, CI ve Docker ile proje tekrar çalıştırılabilir olur.
+Main result:
 
-Gerçek işte bu proje şuna benziyor:
+- Public healthcare data is ingested from source files and connectors.
+- Data quality checks run before the data is used.
+- Raw data can be stored in PostgreSQL.
+- dbt creates staging and analytics mart models.
+- FastAPI serves the modeled data.
+- React dashboard makes the data easy to explore.
+- Tests, CI, and Docker make the project reproducible.
 
-Bir health analytics ekibi farklı public kaynaklardan data alıyor.
-Bu datayı tek bir güvenilir tabloya çeviriyor.
-Ürün ekibi, dashboard ekibi veya analistler bu tabloyu API üstünden kullanıyor.
+In a real company, this is similar to a health analytics pipeline.
+A team collects data from different public sources, turns it into one trusted analytics table, and exposes it to analysts, product teams, or dashboards.
 
-## Bu Projede Ne Öğrendim
+## What I Learned
 
-Bu projede data pipeline'ın sadece kod yazmak olmadığını daha iyi gördüm.
-Data almak kolay gibi duruyor, ama asıl iş data doğru mu, eksik mi, tekrar çalışır mı kısmı.
+I learned that a pipeline is not only about moving data from A to B.
+The hard part is making sure the data is clean, tested, and easy to use again later.
 
-Öğrendiğim ana şeyler:
+Main things I practiced:
 
-- Ingestion kodunu modüler tutmak.
-- Data schema kontrolü yapmak.
-- Test yazmadan pipeline'a güvenmemek.
-- dbt ile raw data ve analytics data ayrımını yapmak.
-- API ve dashboard tarafını aynı mart data üstüne bağlamak.
-- Docker ve CI ile projeyi başka makinada da çalışır hale getirmek.
+- Writing modular ingestion code.
+- Validating required columns and data types.
+- Keeping raw data and analytics data separate.
+- Using dbt for staging and mart models.
+- Serving mart data through an API.
+- Connecting the same data to a dashboard.
+- Running checks in CI so broken data or code is caught early.
 
-## Pipeline Adımları
+## Pipeline Steps
 
 ```text
 Public datasets
@@ -64,117 +63,116 @@ dbt analytics mart
 
 Architecture diagram source: [docs/architecture.mmd](docs/architecture.mmd)
 
-Pipeline basit olarak böyle çalışıyor:
+The pipeline works like this:
 
-1. OWID healthcare datası indirilir.
-2. Gerekli kolonlar kontrol edilir.
-3. Data local dosyaya ve istersem PostgreSQL'e yazılır.
-4. dbt staging modeli raw tabloyu temizler.
-5. dbt mart modeli dashboard için hazır tablo üretir.
-6. FastAPI summary, trend, quality ve insight endpointlerini verir.
-7. React dashboard bu endpointlerden datayı okur.
+1. OWID healthcare data is downloaded.
+2. Required columns and numeric fields are validated.
+3. Data is saved locally and can also be written to PostgreSQL.
+4. dbt staging models clean and prepare the raw table.
+5. dbt mart models create dashboard-ready analytics data.
+6. FastAPI exposes summary, trend, quality, and insight endpoints.
+7. React dashboard reads from the API.
 
-## Data Quality Nasıl Test Ediliyor
+## Data Quality
 
-Data kaliteyi birkaç yerde kontrol ettim.
+Data quality is checked in more than one place.
 
-- Python validation required kolonları kontrol eder.
-- Dataset boş mu bakılır.
-- `country` ve `year` boş mu bakılır.
-- Numeric olması gereken kolonlar numeric mi bakılır.
-- pytest ingestion, analytics ve API davranışlarını test eder.
-- dbt tarafında model parse ve dbt test CI içinde çalışır.
-- API'de `/quality` ve `/freshness` endpointleri data durumunu gösterir.
+- Python validation checks required columns.
+- Empty datasets are rejected.
+- Missing `country` and `year` values are rejected.
+- Numeric columns are checked for correct types.
+- pytest covers ingestion, analytics, and API behavior.
+- dbt parse and dbt tests run in CI.
+- API endpoints like `/quality` and `/freshness` show the current data status.
 
-Bu yüzden sadece dashboard yapmakla kalmadım.
-Data bozulursa testlerin bunu yakalamasını istedim.
+I did not want this to be only a nice dashboard.
+If the data breaks, the project should catch it early.
 
 ## Tech Stack
 
 - Python: ingestion, validation, analytics
-- PostgreSQL: raw ve modeled data storage
-- dbt: staging ve mart modelleri
+- PostgreSQL: raw and modeled data storage
+- dbt: staging and mart models
 - FastAPI: analytics API
 - React + Vite: main dashboard
-- Streamlit: eski dashboard
-- Docker Compose: local full-stack ortam
-- pytest: otomatik testler
-- GitHub Actions: CI ve scheduled pipeline check
+- Streamlit: legacy dashboard
+- Docker Compose: local full-stack setup
+- pytest: automated tests
+- GitHub Actions: CI and scheduled pipeline checks
 
-## Nasıl Çalıştırılır
+## How To Run
 
-Önce dependency kur:
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Windows için en kolay yol:
+The easiest Windows start:
 
 ```powershell
 .\start.ps1
 ```
 
-Bu komut OWID datasını almaya çalışır.
-API ve React frontend'i başlatır.
-Eğer OWID tarafı o an çalışmazsa sample data ile devam eder.
+This command tries to load OWID data, starts the API and React frontend, and opens the app.
+If OWID is not available, it falls back to the sample dataset.
 
-Local adresler:
+Local URLs:
 
 - React dashboard: http://127.0.0.1:5173
 - FastAPI docs: http://127.0.0.1:8002/docs
 
-PostgreSQL ile çalıştırmak için:
+Run with PostgreSQL:
 
 ```powershell
 .\start.ps1 -WithPostgres
 ```
 
-OWID datasını PostgreSQL'e yazıp dbt modellerini de build etmek için:
+Write OWID data to PostgreSQL and build dbt models:
 
 ```powershell
 .\start.ps1 -WithPostgres -WriteDb
 ```
 
-Bu modda API şu dbt mart tablosunu okur:
+When `-WriteDb` is used, the API reads from this dbt mart table:
 
 ```text
 analytics.mart_country_health_trends
 ```
 
-Oluşan ana tablolar:
+Main database tables:
 
 - `raw.health_indicators`
 - `analytics.stg_health_indicators`
 - `analytics.mart_country_health_trends`
 
-## Faydalı Komutlar
+## Useful Commands
 
-Sadece pipeline:
+Run only the pipeline:
 
 ```powershell
 .\scripts\run_pipeline.ps1
 ```
 
-dbt çalıştır:
+Run dbt:
 
 ```powershell
 .\scripts\run_dbt.ps1
 ```
 
-Local kontroller:
+Run local checks:
 
 ```powershell
 .\scripts\check_project.ps1
 ```
 
-Docker full stack:
+Run the Docker full stack:
 
 ```powershell
 .\scripts\start_docker.ps1
 ```
 
-Docker Compose ile manuel:
+Run Docker Compose manually:
 
 ```bash
 docker compose up -d postgres
@@ -182,55 +180,55 @@ docker compose --profile pipeline run --rm pipeline
 docker compose up -d api frontend
 ```
 
-Python orchestration entrypoint:
+Run the Python orchestration entrypoint:
 
 ```bash
 python -m src.orchestration.pipeline
 ```
 
-WHO metadata indir:
+Download WHO metadata:
 
 ```bash
 python -m src.ingestion.load_who --limit 100
 ```
 
-CDC catalog metadata indir:
+Download CDC catalog metadata:
 
 ```bash
 python -m src.ingestion.load_cdc --limit 100
 ```
 
-Sample data kullan:
+Use the sample dataset:
 
 ```powershell
 .\start.ps1 -UseSample
 ```
 
-Eski Streamlit dashboard:
+Run the legacy Streamlit dashboard:
 
 ```powershell
 .\start.ps1 -UseStreamlit
 ```
 
-Testleri çalıştır:
+Run tests:
 
 ```bash
 pytest
 ```
 
-Frontend build:
+Build the frontend:
 
 ```bash
 npm run build --prefix frontend
 ```
 
-API çalıştır:
+Run the API:
 
 ```bash
 uvicorn api.main:app --reload
 ```
 
-React frontend çalıştır:
+Run the React frontend:
 
 ```bash
 cd frontend
@@ -238,21 +236,21 @@ npm install
 npm run dev
 ```
 
-PostgreSQL backup al:
+Back up PostgreSQL:
 
 ```powershell
 .\scripts\backup_postgres.ps1
 ```
 
-Backup restore et:
+Restore PostgreSQL from backup:
 
 ```powershell
 .\scripts\restore_postgres.ps1 -BackupPath .\backups\healthcare-YYYYMMDD_HHMMSS.dump
 ```
 
-## API Endpointleri
+## API Endpoints
 
-Örnek endpointler:
+Useful endpoints:
 
 - `GET /summary?limit=100&offset=0&sort_by=life_expectancy&sort_dir=desc`
 - `GET /indicators?country=Norway&metric=life_expectancy`
@@ -269,22 +267,22 @@ Backup restore et:
 - World Health Organization Global Health Observatory metadata connector
 - Centers for Disease Control and Prevention catalog / Socrata connector
 
-## Projede Olanlar
+## Project Features
 
 - OWID ingestion
-- WHO ve CDC connector entrypointleri
+- WHO and CDC connector entrypoints
 - PostgreSQL raw table
-- dbt staging ve mart modelleri
+- dbt staging and mart models
 - FastAPI analytics API
 - React dashboard
 - Streamlit legacy dashboard
 - Correlation analysis
 - Risk index
-- Year-over-year değişimler
+- Year-over-year changes
 - Anomaly detection
-- Freshness ve quality endpointleri
-- Pagination ve filtering
-- Backup / restore scriptleri
+- Freshness and quality endpoints
+- Pagination and filtering
+- Backup and restore scripts
 - Docker Compose
 - GitHub Actions CI
 - Scheduled pipeline workflow
@@ -293,29 +291,29 @@ Backup restore et:
 
 ![Healthcare Data Platform dashboard](docs/screenshots/dashboard.png)
 
-Screenshot almak için:
+Capture a screenshot locally:
 
 ```powershell
 .\scripts\capture_screenshots.ps1
 ```
 
-## Şu Anki Durum
+## Current Status
 
-Proje şu an çalışır durumda.
-Python testleri, ruff kontrolü, frontend build ve dbt parse kontrolünden geçti.
+The project is working now.
+Python tests, ruff check, frontend build, and dbt parse all passed.
 
-Phase 2 ve Phase 3 tamam.
-Phase 4 advanced özellikleri de eklendi.
+Phase 2 and Phase 3 are complete.
+Phase 4 advanced features are also implemented.
 
-Pipeline OWID datasını alabilir.
-PostgreSQL'e yazabilir.
-dbt staging ve mart modellerini çalıştırabilir.
-FastAPI bu mart datayı React dashboard'a servis eder.
+The pipeline can ingest OWID data.
+It can write to PostgreSQL.
+It can run dbt staging and mart models.
+FastAPI serves the mart data to the React dashboard.
 
-Not: Dataset annual datadır, daily data değildir.
-Current year için kaynakta yayınlanan en yakın değerler kullanılır.
+Note: the dataset is annual, not daily.
+For the current year, the pipeline uses the nearest published values from the source datasets.
 
 ## Medical Disclaimer
 
-Bu proje sadece eğitim ve portfolio amaçlıdır.
-Medical advice, diagnosis veya treatment recommendation vermez.
+This project is only for education and portfolio use.
+It does not provide medical advice, diagnosis, or treatment recommendations.
