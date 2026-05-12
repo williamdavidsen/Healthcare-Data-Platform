@@ -32,6 +32,14 @@ def test_indicator_filter_returns_requested_metric() -> None:
     assert set(rows[0]) == {"country", "iso_code", "year", "life_expectancy"}
 
 
+def test_metrics_endpoint_describes_available_metrics() -> None:
+    response = client.get("/metrics")
+    rows = response.json()
+
+    assert response.status_code == 200
+    assert {"name": "life_expectancy", "quality_min": 0, "quality_max": 130} in rows
+
+
 def test_quality_freshness_and_insight_endpoints() -> None:
     quality = client.get("/quality")
     freshness = client.get("/freshness")

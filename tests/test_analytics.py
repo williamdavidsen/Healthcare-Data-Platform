@@ -81,7 +81,19 @@ def test_freshness_and_quality_reports() -> None:
     data = sample_health_data()
 
     assert data_freshness(data)["latest_year"] == 2024
-    assert data_quality_report(data)["passed"] is True
+    quality = data_quality_report(data)
+    assert quality["passed"] is True
+    assert quality["invalid_ranges"]["life_expectancy"] == 0
+
+
+def test_quality_report_fails_for_invalid_metric_ranges() -> None:
+    data = sample_health_data()
+    data.loc[0, "obesity_rate"] = 140.0
+
+    quality = data_quality_report(data)
+
+    assert quality["passed"] is False
+    assert quality["invalid_ranges"]["obesity_rate"] == 1
 
 
 def test_correlation_records_and_insights_are_available() -> None:

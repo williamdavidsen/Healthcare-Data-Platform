@@ -11,6 +11,15 @@ METRIC_COLUMNS = [
     "health_risk_score",
 ]
 
+QUALITY_RANGES = {
+    "life_expectancy": (0, 130),
+    "diabetes_prevalence": (0, 100),
+    "obesity_rate": (0, 100),
+    "health_spending_per_capita": (0, None),
+    "gdp_per_capita": (0, None),
+    "health_risk_score": (-10, 100),
+}
+
 
 def country_summary(df: pd.DataFrame) -> pd.DataFrame:
     latest_year = df["year"].max()
@@ -95,6 +104,15 @@ def data_quality_report(df: pd.DataFrame) -> dict:
     required_columns = ["country", "iso_code", "year", *[c for c in METRIC_COLUMNS if c in df.columns]]
     missing_values = {column: int(df[column].isna().sum()) for column in required_columns}
     duplicate_rows = int(df.duplicated(subset=["country", "iso_code", "year"]).sum())
+    invalid_ranges = {}
+    for column, (minimum, maximum) in QUALITY_RANGES.items():
+        if column not in df.columns:
+            continue
+        invalid = df[column].lt(minimum)
+        if maximum is not None:
+            invalid = invalid | df[column].gt(maximum)
+        invalid_ranges[column] = int(invalid.sum())
+
     return {
         "row_count": int(len(df)),
         "country_count": int(df["country"].nunique()),
@@ -102,7 +120,12 @@ def data_quality_report(df: pd.DataFrame) -> dict:
         "year_max": int(df["year"].max()),
         "duplicate_country_year_rows": duplicate_rows,
         "missing_values": missing_values,
-        "passed": duplicate_rows == 0 and all(count == 0 for count in missing_values.values()),
+        "invalid_ranges": invalid_ranges,
+        "passed": (
+            duplicate_rows == 0
+            and all(count == 0 for count in missing_values.values())
+            and all(count == 0 for count in invalid_ranges.values())
+        ),
     }
 
 
@@ -158,11 +181,11 @@ def top_insights(df: pd.DataFrame) -> list[dict]:
         biggest_life_gain = life_gain_rows.iloc[0]
         insights.append(
             {
-            "title": "Largest life expectancy gain",
-            "country": biggest_life_gain["country"],
-            "year": int(biggest_life_gain["year"]),
-            "value": round(float(biggest_life_gain["life_expectancy_yoy_change"]), 2),
-            "unit": "YoY years",
+                "title": "Largest life expectancy gain",
+                "country": biggest_life_gain["country"],
+                "year": int(biggest_life_gain["year"]),
+                "value": round(float(biggest_life_gain["life_expectancy_yoy_change"]), 2),
+                "unit": "YoY years",
             }
         )
     return insights

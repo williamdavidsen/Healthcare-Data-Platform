@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.analytics import (
     METRIC_COLUMNS,
+    QUALITY_RANGES,
     add_country_risk_index,
     add_health_risk_score,
     add_year_over_year_changes,
@@ -64,6 +65,18 @@ def health() -> dict[str, str]:
 def countries() -> list[str]:
     df = load_dataset()
     return sorted(df["country"].unique().tolist())
+
+
+@app.get("/metrics")
+def metrics() -> list[dict]:
+    return [
+        {
+            "name": metric,
+            "quality_min": QUALITY_RANGES.get(metric, (None, None))[0],
+            "quality_max": QUALITY_RANGES.get(metric, (None, None))[1],
+        }
+        for metric in METRIC_COLUMNS
+    ]
 
 
 @app.get("/summary")
